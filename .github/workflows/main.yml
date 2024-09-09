@@ -3,6 +3,9 @@ name: 'Terraform'
 on:
   push:
     branches: [ "master" ]
+    paths-ignore:
+      - 'lambda_function.py'
+      - 'lambda_function_payload.zip'
   pull_request:
 
 permissions:
