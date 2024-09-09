@@ -1,8 +1,5 @@
 terraform {
     backend "s3" {
-        bucket = "terraform-state-bucket-testrepo"
-        key    = "terraform.tfstate"
-        region = "us-east-1" 
     }
 }
 
@@ -16,7 +13,6 @@ data "archive_file" "lambda" {
   output_path = "lambda_function_payload.zip"
 }
 
-
 resource "aws_lambda_function" "lseg_lambda" {
 
   filename = "lambda_function_payload.zip"
@@ -26,7 +22,6 @@ resource "aws_lambda_function" "lseg_lambda" {
   runtime = "python3.12"
   timeout = 20
 }  
-
 
 resource "aws_s3_bucket_notification" "bucket_notification" {
   bucket = format("%s-%s", var.input_bucket, var.region)
