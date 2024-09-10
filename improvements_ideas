@@ -1,0 +1,4 @@
+Terraform: 
+
+1. Change code to pass env variable as region instead of having it hard-coded 
+2. Remove filename from lambda if deploying 2nd pipeline to avoid managing code state and getting configuration drift 
