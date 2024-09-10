@@ -14,7 +14,6 @@ resource "aws_iam_role" "lseg_lambda_role" {
   })
 }
 
-
 resource "aws_iam_role_policy_attachment" "lambda-attach-custom-policy" {
   role       = aws_iam_role.lseg_lambda_role.name
   policy_arn = aws_iam_policy.lseg_lambda_policy.arn
@@ -24,9 +23,4 @@ resource "aws_iam_role_policy_attachment" "lambda-attach-custom-policy" {
 resource "aws_iam_role_policy_attachment" "lambda-attach-managed-policy" {
   role       = aws_iam_role.lseg_lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/AWSLambdaExecute"
-}
-
-
-output "iam_role_arn" {
-  value = aws_iam_role.lseg_lambda_role.arn
 }
