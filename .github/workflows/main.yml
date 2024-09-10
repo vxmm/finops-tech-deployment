@@ -33,12 +33,23 @@ jobs:
       uses: actions/checkout@v4
 
     #Validate infrastructure deployment
-    - name: Validate infrastructure deployment
+    - name: Validate region variable deployment
       run:  |
-        var1=$(grep "region" ./variables.tf | awk '{print $3}')
-        var2=$(grep "region" ./iam/variables.tf | awk '{print $3}')
-        if [[ "$var1" != "$var2" ]]; then
+        var_region_1=$(grep "region" ./variables.tf | awk '{print $3}')
+        var_region_2=$(grep "region" ./iam/variables.tf | awk '{print $3}')
+        if [[ "$var_region_1" != "$var_region_2" ]]; then
           echo "Please ensure the region variable in each module is identical."
+          exit 1
+        fi
+
+        echo "Region variables matching"
+
+    - name: Validate bucket name deployment
+      run:  |
+        var1_input_bucket=$(grep "input_bucket" ./variables.tf | awk -F '=' '{print $3}')
+        var2_input_bucket=$(grep "bucket_name" ./lambda_function.py | awk '{print $3}')
+        if [[ "$var1" != "$var2" ]]; then
+          echo "Please ensure the input bucket name in the code module matches the infrastructure deployment variable."
           exit 1
         fi
 
