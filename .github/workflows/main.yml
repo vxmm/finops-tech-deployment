@@ -32,6 +32,18 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    #Validate infrastructure deployment
+    - name: Validate infrastructure deployment
+      run:  |
+        var1=$(grep "region" ./variables.tf | awk '{print $3}')
+        var2=$(grep "region" ./iam/variables.tf | awk '{print $3}')
+        if [[ "$var1" != "$var2" ]]; then
+          echo "Please ensure the region variable in each module is identical."
+          exit 1
+        fi
+
+        echo "Region variables matching"
+
     - name: Configure AWS credentials from AWS account
       uses: aws-actions/configure-aws-credentials@v2
       with:
