@@ -2,8 +2,7 @@ name: Code Release (CloudFormation)
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "master" ]
     paths:
       - 'lambda_function.py'
 
