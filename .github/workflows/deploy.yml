@@ -1,4 +1,4 @@
-name: Deploy to CloudFormation
+name: Code Release (CloudFormation)
 
 on:
   push:

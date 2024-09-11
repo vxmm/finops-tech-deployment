@@ -1,4 +1,4 @@
-name: 'Terraform'
+name: Infrastructure Release (Terraform)
 
 on:
   push:
@@ -43,14 +43,22 @@ jobs:
 
     - name: Validate bucket name deployment
       run:  |
-        var1_input_bucket=$(grep "input_bucket" ./variables.tf | awk -F '=' '{print $3}')
-        pattern="f\"project-stocks-vxmm-(.*?)\""
-        extracted_bucket_name=$(grep "$pattern" ./lambda_function.py | awk -F '"' '{print $2}')
-        var2_input_bucket=$(grep "bucket_name" ./lambda_function.py | awk '{print $3}')
-        if [[ "$var1_input_bucket" != "project-stocks-vxmm-"$extracted_bucket_name ]]; then
+        var1_input_bucket=$(grep "input_bucket" ./variables.tf | awk -F '=' '{print $3}' | tr -d ' "')
+        current_region=$(grep "default" ./variables.tf | grep region | awk -F '=' '{print $3}' | tr -d ' "')
+    
+    
+        expected_bucket_name="project-stocks-vxmm-${current_region}"
+
+        if [[ "$var1_input_bucket" != "project-stocks-vxmm" ]]; then
            echo "Please ensure the input bucket name in the code module matches the infrastructure deployment variable."
-           echo "Expected format: project-stocks-vxmm-<region>"
-           exit 1
+           echo "Expected format: project-stocks-vxmm"
+        exit 1
+        fi
+
+        if [[ "$expected_bucket_name" != "project-stocks-vxmm-${current_region}" ]]; then
+          echo "Please ensure the input bucket name in the Python module matches the correct format."
+          echo "Expected format: project-stocks-vxmm-${current_region}"
+          exit 1
         fi
 
         echo "Bucket names matching"
