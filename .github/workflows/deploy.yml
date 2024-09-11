@@ -37,4 +37,4 @@ jobs:
 
       - name: Upload code to S3 bucket
         run: |
-          aws s3 cp --recursive --profile default code/ s3://${{ secrets.S3_BUCKET_NAME }}
+          aws s3 cp --recursive code/ s3://${{ secrets.S3_BUCKET_NAME }}
