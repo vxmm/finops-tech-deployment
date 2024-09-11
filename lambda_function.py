@@ -3,7 +3,7 @@ import csv
 import os
 import random
 import datetime
-# Testing pipeline 2
+# Testing pipeline
 def create_temp_files(bucket, key):
     file_extension = key.split('.')[-1]
     
