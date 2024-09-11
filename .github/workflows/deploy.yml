@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'lambda_function.py'
 
 jobs:
   deploy:
@@ -25,10 +27,7 @@ jobs:
         with:
           name: code
           path: .
+
       - name: Upload code to S3 bucket
         run: |
           aws s3 cp --recursive --profile default code/ s3://${{ secrets.S3_BUCKET_NAME }}
-
-      - name: Update CloudFormation stack
-        run: |
-          aws cloudformation update-stack --stack-name my-stack --template-body-file my-template.yaml

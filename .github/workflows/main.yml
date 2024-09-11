@@ -50,7 +50,7 @@ jobs:
         if [[ "$var1_input_bucket" != "project-stocks-vxmm-"$extracted_bucket_name ]]; then
            echo "Please ensure the input bucket name in the code module matches the infrastructure deployment variable."
            echo "Expected format: project-stocks-vxmm-<region>"
-          exit 1
+           exit 1
         fi
 
         echo "Bucket names matching"
