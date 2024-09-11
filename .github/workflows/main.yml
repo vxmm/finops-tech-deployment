@@ -1,4 +1,4 @@
-name: Infrastructure Release (Terraform)
+name: 'Terraform'
 
 on:
   push:
@@ -22,14 +22,17 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
 
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
         shell: bash
-    steps:
 
+    steps:
+    # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v4
 
+    #Validate infrastructure deployment
     - name: Validate region variable deployment
       run:  |
         var_region_1=$(grep "region" ./variables.tf | awk '{print $3}')
@@ -43,21 +46,13 @@ jobs:
 
     - name: Validate bucket name deployment
       run:  |
-        var1_input_bucket=$(grep "input_bucket" ./variables.tf | awk -F '=' '{print $3}' | tr -d ' "')
-        current_region=$(grep "default" ./variables.tf | grep region | awk -F '=' '{print $3}' | tr -d ' "')
-    
-    
-        expected_bucket_name="project-stocks-vxmm-${current_region}"
-
-        if [[ "$var1_input_bucket" != "project-stocks-vxmm" ]]; then
+        var1_input_bucket=$(grep "input_bucket" ./variables.tf | awk -F '=' '{print $3}')
+        pattern="f\"project-stocks-vxmm-(.*?)\""
+        extracted_bucket_name=$(grep "$pattern" ./lambda_function.py | awk -F '"' '{print $2}')
+        var2_input_bucket=$(grep "bucket_name" ./lambda_function.py | awk '{print $3}')
+        if [[ "$var1_input_bucket" != "project-stocks-vxmm-"$extracted_bucket_name ]]; then
            echo "Please ensure the input bucket name in the code module matches the infrastructure deployment variable."
-           echo "Expected format: project-stocks-vxmm"
-        exit 1
-        fi
-
-        if [[ "$expected_bucket_name" != "project-stocks-vxmm-${current_region}" ]]; then
-          echo "Please ensure the input bucket name in the Python module matches the correct format."
-          echo "Expected format: project-stocks-vxmm-${current_region}"
+           echo "Expected format: project-stocks-vxmm-<region>"
           exit 1
         fi
 
@@ -70,22 +65,65 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           role-session-name: GitHub-OIDC-TERRAFORM
 
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
 
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       env:
           AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
           AWS_BUCKET_KEY_NAME: ${{ secrets.AWS_BUCKET_KEY_NAME }}
       run: terraform init -backend-config="bucket=${AWS_BUCKET_NAME}" -backend-config="key=${AWS_BUCKET_KEY_NAME}" -backend-config="region=${AWS_REGION}"
 
+
+    # Generates an execution plan for Terraform
     - name: Terraform Plan
       run: terraform plan -input=false
+
+    - uses: actions/github-script@v6
+      if: github.event_name == 'pull_request'
+      env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            <details><summary>Validation Output</summary>
+
+            \`\`\`\n
+            ${{ steps.validate.outputs.stdout }}
+            \`\`\`
+
+            </details>
+
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
 
     - name: Terraform Plan Status
       if: steps.plan.outcome == 'failure'
       run: exit 1
-    
+      # On push to "master", build or change infrastructure according to Terraform configuration files
+      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
     - name: Terraform Apply
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: terraform apply -auto-approve -input=false
