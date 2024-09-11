@@ -6,6 +6,14 @@ on:
     paths:
       - 'lambda_function.py'
 
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TF_LOG: INFO
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
