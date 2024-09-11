@@ -1,0 +1,24 @@
+version: '1'
+
+services:
+  web:
+    build:
+      context: ./web
+    ports:
+      - "8080:8080"
+    depends_on:
+      - processor
+    networks:
+      - app-network
+
+  processor:
+    build:
+      context: ./processor
+    ports:
+      - "5000:5000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
