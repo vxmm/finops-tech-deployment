@@ -34,6 +34,14 @@ See GitHub's [official documentation](https://docs.github.com/en/actions/securit
 
 # Deployment Workflows
 
-Ideally, we would like to keep the infrastructure and code release pipelines separated. 
+Since the project is rather basic, we keep the infrastructure and code release pipelines separated within the same repo. An update to the python code pushes the artifact to the corresponding S3 bucket, whereas an update to the infrastructure code triggers a Terraform build. These two behaviors are integrated in the 2 Workflows attached to the project. 
 
 ![image](https://github.com/user-attachments/assets/7b045401-4d13-4bb9-856c-5d51e67cd4d2)
+
+# Validation 
+
+We perform a few validations before deployment into infrastructure, namely that: 
+
+* the name of the S3 input bucket matches the hardcoded value "project-stocks-vxmm" so it doesn't accidentally source other buckets when deploying 
+* the name of the S3 output bucket matches the prescriptive value "project-stocks-vxmm-${current_region}" so it doesn't provision new buckets
+* the region name is consistent across all references in modules and main variables.tf - this is not too much of a concern for IAM since it's a global service and we're not doing multi-region deployments but it's a good idea to have this sort of check regardless 
