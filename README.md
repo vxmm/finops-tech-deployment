@@ -1,12 +1,10 @@
 # About
 
-This project is a continuation of the lseg-tech-challenge designed to provide an infrastructure implementation in AWS. It adheres to standards of flexibility, reusability and reliability using known software design patterns, including modular and design and separated pipelines for infrastructure and code deployment.
+This project is a continuation of the [finops-tech-challenge](https://github.com/vxmm/finops-tech-challenge) designed to provide an infrastructure implementation in AWS. It adheres to standards of flexibility, reusability and reliability using known software design patterns, including modular and design and separated pipelines for infrastructure and code deployment.
 
-It should be noted that an exact implementation into the infrastructure was adapted in accordance to how I imagined the best use-case for this project in hopes that it would serve as a good starting point for my interview in a few days. 
+# Changes to integrate with Lambda
 
-# Python project
-
-For a detailed explanation on the Python code utilised, see my other interview project. Major changes for integration with Lambda involve the following: 
+For a detailed explanation on the Python code utilised, see my [other project](https://github.com/vxmm/finops-tech-challenge). Major changes for integration with Lambda involve the following: 
 
 * only processing 1 file at a time based on the S3 PUT event in a particular bucket
 * as we are processing objects instead of files, we are no longer abiding by the directory level requirements & verification
